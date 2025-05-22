@@ -6,7 +6,7 @@ function Productos() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:000/productos')
+    axios.get('http://localhost:5000/productos')
       .then(res => setProductos(res.data))
       .catch(() => setError('Error al cargar los productos'));
   }, []);
