@@ -18,7 +18,6 @@ Implementa funcionalidades de carrito de compras, autenticación JWT, integraci�
 | 💳 Transbank  | Integración de pagos Webpay Plus (TEST) |
 | 💻 Frontend   | HTML, CSS y JavaScript puro           |
 | 🔐 JWT        | Autenticación basada en tokens        |
-| 🐍 Werkzeug   | Seguridad para manejo de passwords    |
 
 ---
 
@@ -39,7 +38,7 @@ frontend/
 ├── login.html               # Página de login
 ├── productos.html           # Listado de productos
 ├── carrito.html             # Carrito de compras
-├── js/                     # Scripts JS (carrito.js)
+├── js/                     # Scripts JS
 └── css/                    # Estilos CSS
 
 ⚙️ Instalación y configuración
