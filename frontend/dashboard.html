@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FERREMAS | Panel</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+  <header>
+    <h1>Panel de usuario - FERREMAS</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="carrito.html">Carrito🛒</a>
+      <a href="#" id="cerrar-sesion">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2 id="bienvenida"></h2>
+    <div id="contenido-rol"></div>
+  </main>
+
+  <footer>
+    <p>© 2025 FERREMAS</p>
+  </footer>
+
+  <script>
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    const bienvenida = document.getElementById('bienvenida');
+    const contenido = document.getElementById('contenido-rol');
+
+    if (!usuario) {
+      window.location.href = 'login.html';
+    } else {
+      bienvenida.textContent = `Bienvenido, ${usuario.correo} (Rol: ${usuario.rol})`;
+
+      switch (usuario.rol) {
+        case 'admin':
+          contenido.innerHTML = `
+            <h3>Panel del administrador</h3>
+            <p>Aquí puedes gestionar productos, usuarios y pedidos.</p>
+          `;
+          break;
+        case 'vendedor':
+          contenido.innerHTML = `
+            <h3>Panel del vendedor</h3>
+            <p>Revisa pedidos pendientes y confirma ventas.</p>
+          `;
+          break;
+        case 'cliente':
+          contenido.innerHTML = `
+            <h3>Panel del cliente</h3>
+            <p>Visualiza tus pedidos, realiza nuevas compras y consulta productos.</p>
+          `;
+          break;
+        case 'bodeguero':
+          contenido.innerHTML = `
+            <h3>Panel del bodeguero</h3>
+            <p>Prepara órdenes y gestiona el inventario aprobado.</p>
+          `;
+          break;
+        case 'contador':
+          contenido.innerHTML = `
+            <h3>Panel del contador</h3>
+            <p>Confirma pagos y registra entregas a clientes.</p>
+          `;
+          break;
+        default:
+          contenido.innerHTML = `<p>Rol no reconocido.</p>`;
+      }
+    }
+
+    // Cerrar sesión
+    document.getElementById('cerrar-sesion').addEventListener('click', () => {
+      localStorage.removeItem('usuario');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

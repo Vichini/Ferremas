@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FERREMAS | Iniciar sesión / Crear cuenta</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+  <style>
+    main {
+      max-width: 400px;
+      margin: 2rem auto;
+      background: #f9f9f9;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    form {
+      display: none;
+      flex-direction: column;
+    }
+    form.active {
+      display: flex;
+    }
+    label {
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.8rem;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #1a242f;
+    }
+    .toggle-link {
+      margin-top: 1rem;
+      color: #2c3e50;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      user-select: none;
+      text-align: center;
+    }
+    .error-msg {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+    .success-msg {
+      color: #27ae60;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FERREMAS - Iniciar sesión o Crear cuenta</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="carrito.html">Carrito🛒</a>
+      <a href="login.html">Iniciar sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Formulario de Login -->
+    <form id="form-login" class="active">
+      <label for="login-correo">Correo:</label>
+      <input type="email" id="login-correo" name="correo" required />
+
+      <label for="login-password">Contraseña:</label>
+      <input type="password" id="login-password" name="password" required />
+
+      <button type="submit">Ingresar</button>
+      <div class="toggle-link" id="show-register">¿No tienes cuenta? Crear una</div>
+      <div class="error-msg" id="login-error"></div>
+    </form>
+
+    <!-- Formulario de Registro -->
+    <form id="form-register">
+      <label for="register-usuario">Usuario:</label>
+      <input type="text" id="register-usuario" name="usuario" required />
+
+      <label for="register-password">Contraseña:</label>
+      <input type="password" id="register-password" name="password" required />
+
+      <label for="register-password-confirm">Confirmar contraseña:</label>
+      <input type="password" id="register-password-confirm" name="password-confirm" required />
+
+      <button type="submit">Crear cuenta</button>
+      <div class="toggle-link" id="show-login">¿Ya tienes cuenta? Iniciar sesión</div>
+      <div class="error-msg" id="register-error"></div>
+      <div class="success-msg" id="register-success"></div>
+    </form>
+  </main>
+
+  <footer>
+    <p>© 2025 FERREMAS. Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    // Mostrar / ocultar formularios
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+    const showRegisterLink = document.getElementById('show-register');
+    const showLoginLink = document.getElementById('show-login');
+
+    showRegisterLink.addEventListener('click', () => {
+      formLogin.classList.remove('active');
+      formRegister.classList.add('active');
+      clearMessages();
+    });
+
+    showLoginLink.addEventListener('click', () => {
+      formRegister.classList.remove('active');
+      formLogin.classList.add('active');
+      clearMessages();
+    });
+
+    // Mensajes
+    const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
+    const registerSuccess = document.getElementById('register-success');
+
+    function clearMessages() {
+      loginError.textContent = '';
+      registerError.textContent = '';
+      registerSuccess.textContent = '';
+    }
+
+    // Registro local
+    function obtenerUsuarios() {
+      return JSON.parse(localStorage.getItem('usuarios-ferremas')) || [];
+    }
+
+    function guardarUsuarios(usuarios) {
+      localStorage.setItem('usuarios-ferremas', JSON.stringify(usuarios));
+    }
+
+    formRegister.addEventListener('submit', e => {
+      e.preventDefault();
+      clearMessages();
+
+      const usuario = document.getElementById('register-usuario').value.trim();
+      const password = document.getElementById('register-password').value;
+      const passwordConfirm = document.getElementById('register-password-confirm').value;
+
+      if (password !== passwordConfirm) {
+        registerError.textContent = 'Las contraseñas no coinciden.';
+        return;
+      }
+      if (password.length < 4) {
+        registerError.textContent = 'La contraseña debe tener al menos 4 caracteres.';
+        return;
+      }
+      if (usuario.length < 3) {
+        registerError.textContent = 'El usuario debe tener al menos 3 caracteres.';
+        return;
+      }
+
+      const usuarios = obtenerUsuarios();
+      const existeUsuario = usuarios.find(u => u.usuario.toLowerCase() === usuario.toLowerCase());
+
+      if (existeUsuario) {
+        registerError.textContent = 'El usuario ya existe.';
+        return;
+      }
+
+      usuarios.push({ usuario, password });
+      guardarUsuarios(usuarios);
+
+      registerSuccess.textContent = 'Cuenta creada exitosamente. Ya puedes iniciar sesión.';
+      formRegister.reset();
+    });
+
+    // Login con backend y redirección por rol
+    formLogin.addEventListener('submit', async e => {
+      e.preventDefault();
+      clearMessages();
+
+      const correo = document.getElementById('login-correo').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const res = await fetch('http://localhost:5000/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ correo, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('usuario', JSON.stringify({ correo, rol: data.rol || 'usuario' }));
+
+          alert(`Bienvenido, ${correo}!`);
+          formLogin.reset();
+
+          // Redireccionar según rol
+          if (data.rol === 'admin') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+        } else {
+          loginError.textContent = data.mensaje || 'Credenciales inválidas';
+        }
+      } catch (error) {
+        loginError.textContent = 'Error al conectar con el servidor';
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>

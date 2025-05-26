@@ -2,16 +2,20 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_cors import CORS
+from flask_migrate import Migrate
+import jwt
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"])  # Habilitar CORS solo para React
+CORS(app, supports_credentials=True)  
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ferremas.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'tu_clave_secreta_muy_segura'  
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Modelos
 class Usuario(db.Model):
@@ -27,7 +31,7 @@ class Producto(db.Model):
     descripcion = db.Column(db.String(200))
     precio = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
-
+    imagen_url = db.Column(db.String(250))
 class Pedido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
@@ -48,31 +52,46 @@ class DetallePedido(db.Model):
 with app.app_context():
     db.create_all()
 
-# Decorador de autenticación con rol
-def requiere_rol(*roles_permitidos):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            auth = request.authorization
-            if not auth:
-                return jsonify({"mensaje": "Autenticación requerida"}), 401
-            usuario = Usuario.query.filter_by(correo=auth.username).first()
-            if not usuario or not check_password_hash(usuario.password, auth.password):
-                return jsonify({"mensaje": "Credenciales inválidas"}), 401
-            if usuario.rol not in roles_permitidos:
-                return jsonify({"mensaje": "No tiene permiso para esta acción"}), 403
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
 @app.route('/')
 def index():
     return jsonify({"mensaje": "API FERREMAS en funcionamiento"})
 
-# Registro y login
+
+def token_requerido(roles_permitidos=None):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            token = None
+            if 'Authorization' in request.headers:
+                partes = request.headers['Authorization'].split()
+                if len(partes) == 2 and partes[0] == 'Bearer':
+                    token = partes[1]
+            if not token:
+                return jsonify({'mensaje': 'Token de autenticación requerido'}), 401
+            try:
+                data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+                usuario = Usuario.query.get(data['user_id'])
+                if not usuario:
+                    return jsonify({'mensaje': 'Usuario no encontrado'}), 401
+                if roles_permitidos and usuario.rol not in roles_permitidos:
+                    return jsonify({'mensaje': 'No tiene permiso para esta acción'}), 403
+                return f(usuario, *args, **kwargs)
+            except jwt.ExpiredSignatureError:
+                return jsonify({'mensaje': 'Token expirado'}), 401
+            except jwt.InvalidTokenError:
+                return jsonify({'mensaje': 'Token inválido'}), 401
+        return wrapper
+    return decorator
+
 @app.route('/registrar_usuario', methods=['POST'])
 def registrar_usuario():
     datos = request.get_json()
+    if not datos:
+        return jsonify({"mensaje": "Datos no proporcionados"}), 400
+    required_fields = ['nombre', 'correo', 'password', 'rol']
+    for campo in required_fields:
+        if campo not in datos or not datos[campo]:
+            return jsonify({"mensaje": f"El campo '{campo}' es obligatorio"}), 400
     if Usuario.query.filter_by(correo=datos['correo']).first():
         return jsonify({"mensaje": "Este correo ya está registrado"}), 400
     hashed_password = generate_password_hash(datos['password'])
@@ -86,121 +105,133 @@ def registrar_usuario():
     db.session.commit()
     return jsonify({"mensaje": "Usuario creado correctamente"}), 201
 
+
 @app.route('/login', methods=['POST'])
 def login():
     datos = request.get_json()
+    if not datos or not datos.get('correo') or not datos.get('password'):
+        return jsonify({"mensaje": "Correo y contraseña son requeridos"}), 400
     usuario = Usuario.query.filter_by(correo=datos['correo']).first()
     if not usuario:
         return jsonify({"mensaje": "Correo no registrado"}), 404
     if check_password_hash(usuario.password, datos['password']):
+        token = jwt.encode({
+            'user_id': usuario.id,
+            'rol': usuario.rol,
+            'exp': datetime.utcnow() + timedelta(hours=8)
+        }, app.config['SECRET_KEY'], algorithm='HS256')
         return jsonify({
             "mensaje": f"Bienvenido, {usuario.nombre}",
+            "token": token,
             "rol": usuario.rol
         }), 200
     else:
         return jsonify({"mensaje": "Contraseña incorrecta"}), 401
 
-# CRUD Productos
-@app.route('/productos', methods=['POST'])
-@requiere_rol('admin', 'vendedor')
-def crear_producto():
+
+@app.route('/usuario/me', methods=['GET'])
+@token_requerido()
+def obtener_perfil(usuario):
+    return jsonify({
+        "nombre": usuario.nombre,
+        "correo": usuario.correo,
+        "rol": usuario.rol
+    })
+
+
+@app.route('/usuario/me', methods=['PUT'])
+@token_requerido()
+def actualizar_perfil(usuario):
     datos = request.get_json()
-    nuevo_producto = Producto(
-        nombre=datos['nombre'],
-        descripcion=datos.get('descripcion', ''),
-        precio=datos['precio'],
-        stock=datos['stock']
-    )
-    db.session.add(nuevo_producto)
+    if not datos:
+        return jsonify({"mensaje": "Datos no proporcionados"}), 400
+    if 'nombre' in datos:
+        usuario.nombre = datos['nombre']
+    if 'correo' in datos:
+        if Usuario.query.filter(Usuario.correo == datos['correo'], Usuario.id != usuario.id).first():
+            return jsonify({"mensaje": "Correo ya está en uso"}), 400
+        usuario.correo = datos['correo']
+    if 'password' in datos:
+        usuario.password = generate_password_hash(datos['password'])
     db.session.commit()
-    return jsonify({"mensaje": "Producto creado correctamente"}), 201
+    return jsonify({"mensaje": "Perfil actualizado correctamente"})
 
 @app.route('/productos', methods=['GET'])
-def listar_productos():
+def obtener_productos():
     productos = Producto.query.all()
-    return jsonify([{
-        "id": p.id,
-        "nombre": p.nombre,
-        "descripcion": p.descripcion,
-        "precio": p.precio,
-        "stock": p.stock
-    } for p in productos])
+    lista_productos = []
+    for p in productos:
+        lista_productos.append({
+            "id": p.id,
+            "nombre": p.nombre,
+            "descripcion": p.descripcion,
+            "precio": p.precio,
+            "stock": p.stock,
+            "imagen_url": p.imagen_url
+        })
+    return jsonify(lista_productos)
 
-@app.route('/productos/<int:id>', methods=['PUT'])
-@requiere_rol('admin', 'vendedor')
-def actualizar_producto(id):
-    producto = Producto.query.get_or_404(id)
+# Nuevo endpoint para crear pedido desde carrito
+@app.route('/pedido', methods=['POST'])
+@token_requerido()
+def crear_pedido(usuario):
     datos = request.get_json()
-    producto.nombre = datos.get('nombre', producto.nombre)
-    producto.descripcion = datos.get('descripcion', producto.descripcion)
-    producto.precio = datos.get('precio', producto.precio)
-    producto.stock = datos.get('stock', producto.stock)
-    db.session.commit()
-    return jsonify({"mensaje": "Producto actualizado correctamente"})
+    carrito = datos.get('carrito')
+    if not carrito or not isinstance(carrito, list) or len(carrito) == 0:
+        return jsonify({'mensaje': 'El carrito está vacío o inválido'}), 400
 
-@app.route('/productos/<int:id>', methods=['DELETE'])
-@requiere_rol('admin', 'vendedor')
-def eliminar_producto(id):
-    producto = Producto.query.get_or_404(id)
-    db.session.delete(producto)
-    db.session.commit()
-    return jsonify({"mensaje": "Producto eliminado correctamente"})
-
-# Gestión Pedidos Clientes
-@app.route('/pedidos', methods=['POST'])
-@requiere_rol('cliente')
-def crear_pedido():
-    datos = request.get_json()
-    usuario = Usuario.query.filter_by(correo=request.authorization.username).first()
-    productos_pedido = datos.get('productos')
-    if not productos_pedido:
-        return jsonify({"mensaje": "Debe enviar al menos un producto en el pedido"}), 400
     total = 0
     detalles = []
-    for item in productos_pedido:
-        producto = Producto.query.get(item['producto_id'])
+
+    # Validar stock y calcular total
+    for item in carrito:
+        producto = Producto.query.get(item.get('id'))
         if not producto:
-            return jsonify({"mensaje": f"Producto ID {item['producto_id']} no encontrado"}), 404
-        if producto.stock < item['cantidad']:
-            return jsonify({"mensaje": f"Stock insuficiente para producto {producto.nombre}"}), 400
-        subtotal = producto.precio * item['cantidad']
+            return jsonify({'mensaje': f'Producto con id {item.get("id")} no encontrado'}), 404
+        cantidad = item.get('cantidad', 0)
+        if cantidad <= 0:
+            return jsonify({'mensaje': 'Cantidad inválida para algún producto'}), 400
+        if producto.stock < cantidad:
+            return jsonify({'mensaje': f'Stock insuficiente para el producto {producto.nombre}'}), 400
+
+        subtotal = producto.precio * cantidad
         total += subtotal
-        detalles.append((producto, item['cantidad'], subtotal))
-    nuevo_pedido = Pedido(usuario_id=usuario.id, total=total)
+        detalles.append({
+            'producto': producto,
+            'cantidad': cantidad,
+            'subtotal': subtotal
+        })
+
+    # Crear pedido
+    nuevo_pedido = Pedido(
+        usuario_id=usuario.id,
+        total=total,
+        estado='pendiente'
+    )
     db.session.add(nuevo_pedido)
-    db.session.flush()
-    for producto, cantidad, subtotal in detalles:
-        detalle = DetallePedido(
+    db.session.flush()  # Para obtener id del pedido
+
+    # Crear detalles pedido y descontar stock
+    for detalle in detalles:
+        producto = detalle['producto']
+        cantidad = detalle['cantidad']
+        subtotal = detalle['subtotal']
+
+        detalle_pedido = DetallePedido(
             pedido_id=nuevo_pedido.id,
             producto_id=producto.id,
             cantidad=cantidad,
             subtotal=subtotal
         )
-        producto.stock -= cantidad
-        db.session.add(detalle)
-    db.session.commit()
-    return jsonify({"mensaje": "Pedido creado correctamente", "pedido_id": nuevo_pedido.id}), 201
+        db.session.add(detalle_pedido)
 
-@app.route('/mis_pedidos', methods=['GET'])
-@requiere_rol('cliente')
-def listar_mis_pedidos():
-    usuario = Usuario.query.filter_by(correo=request.authorization.username).first()
-    pedidos = Pedido.query.filter_by(usuario_id=usuario.id).all()
-    resultado = []
-    for pedido in pedidos:
-        detalles = [{
-            "producto": d.producto.nombre,
-            "cantidad": d.cantidad,
-            "subtotal": d.subtotal
-        } for d in pedido.detalles]
-        resultado.append({
-            "pedido_id": pedido.id,
-            "fecha": pedido.fecha.isoformat(),
-            "total": pedido.total,
-            "estado": pedido.estado,
-            "detalles": detalles
-        })
-    return jsonify(resultado)
+        # Actualizar stock
+        producto.stock -= cantidad
+
+    db.session.commit()
+
+    return jsonify({'mensaje': 'Pedido creado correctamente', 'pedido_id': nuevo_pedido.id}), 201
+
 
 if __name__ == '__main__':
     app.run(debug=True)
