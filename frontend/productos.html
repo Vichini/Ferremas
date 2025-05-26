@@ -5,6 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FERREMAS | Todos los productos</title>
   <link rel="stylesheet" href="css/estilos.css" />
+  <style>
+    /* Estilo básico para imagenes producto */
+    .producto {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px;
+      width: 220px;
+      text-align: center;
+      display: inline-block;
+      vertical-align: top;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 5px;
+      background-color: #fff;
+    }
+    .producto-imagen {
+      max-width: 200px;
+      height: 150px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .productos-grid {
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -12,7 +47,7 @@
     <nav>
       <a href="index.html">Inicio</a>
       <a href="productos.html" class="activo">Productos</a>
-      <a href="carrito.html">Carrito🛒</a>
+      <a href="carrito.html">Carrito</a>
       <a href="login.html">Iniciar sesión</a>
     </nav>
   </header>
@@ -26,9 +61,63 @@
     <p>© 2025 FERREMAS</p>
   </footer>
 
-  <script src="js/productos.js"></script>
-</body>
-<script src="js/carrito.js"></script>
-<script src="js/productos.js"></script>
+  <script src="js/carrito.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let valorDolar = 0;
 
+ fetch("http://localhost:5000/dolar")
+  .then(res => res.json())
+  .then(data => {
+    if (data.dolar) {
+      localStorage.setItem('valorDolar', data.dolar);
+      valorDolar = parseFloat(data.dolar);
+      cargarProductos();
+    } else {
+      throw new Error("No se encontró el valor del dólar");
+    }
+  })
+  .catch(err => {
+    console.error("Error al obtener el dólar:", err);
+    alert("No se pudo obtener el valor del dólar");
+  });
+
+
+      function cargarProductos(sinDolar = false) {
+        fetch("http://localhost:5000/productos")
+          .then(res => res.json())
+          .then(productos => {
+            const contenedor = document.getElementById("productos-listado");
+            contenedor.innerHTML = "";
+
+            productos.forEach(producto => {
+              const precioUsd = sinDolar ? "N/A" : (producto.precio / valorDolar).toFixed(2);
+
+              const div = document.createElement("div");
+              div.classList.add("producto");
+              div.innerHTML = `
+                <img src="${producto.imagen}" alt="Imagen de ${producto.nombre}" class="producto-imagen" />
+                <h3>${producto.nombre}</h3>
+                <p>${producto.descripcion}</p>
+                <p><strong>Precio CLP:</strong> $${producto.precio}</p>
+                <p><strong>Precio USD:</strong> $${precioUsd}</p>
+                <p><strong>Stock:</strong> ${producto.stock}</p>
+                <button onclick='agregarProductoAlCarrito({
+                  id: ${producto.id},
+                  nombre: "${producto.nombre.replace(/"/g, '\\"')}",
+                  precio: ${producto.precio}
+                })'>Agregar al carrito</button>
+              `;
+              contenedor.appendChild(div);
+            });
+          })
+          .catch(e => {
+            console.error("Error al cargar productos:", e);
+            alert("No se pudieron cargar los productos");
+          });
+      }
+    });
+  </script>
+
+</body>
 </html>

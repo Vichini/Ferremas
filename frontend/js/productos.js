@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <img src="${prod.imagen_url || 'img/placeholder.png'}" alt="${prod.nombre}" />
           <h3>${prod.nombre}</h3>
           <p>${prod.descripcion}</p>
-          <p><strong>Precio:</strong> $${prod.precio}</p>
+          <p><strong>Precio:</strong> $${prod.precio.toFixed(2)}</p>
           <p><strong>Stock:</strong> ${prod.stock}</p>
           <button class="btn-agregar">Agregar al carrito</button>
         `;
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nombre: prod.nombre,
             precio: prod.precio,
           };
-          agregarProductoAlCarrito(productoParaCarrito);
+          window.agregarProductoAlCarrito(productoParaCarrito);
         });
 
         return div;
@@ -37,13 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Mostrar productos completos si hay contenedor
       if (contenedorListado) {
+        contenedorListado.innerHTML = ''; // limpiar antes
         data.forEach(prod => {
           contenedorListado.appendChild(renderProducto(prod));
         });
       }
 
-      // Mostrar solo los primeros 3 como destacados si hay contenedor
+      // Mostrar solo primeros 3 como destacados, sin slider
       if (contenedorDestacados) {
+        contenedorDestacados.innerHTML = ''; // limpiar antes
         const destacados = data.slice(0, 3);
         destacados.forEach(prod => {
           contenedorDestacados.appendChild(renderProducto(prod));
@@ -56,5 +58,4 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(err);
     });
 
-    
 });

@@ -6,13 +6,14 @@ from datetime import datetime, timedelta
 from flask_cors import CORS
 from flask_migrate import Migrate
 import jwt
+import requests
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)  
+CORS(app, origins=["http://127.0.0.1:5500", "http://localhost:5500"], supports_credentials=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ferremas.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'tu_clave_secreta_muy_segura'  
+app.config['SECRET_KEY'] = 'tu_clave_secreta_muy_segura'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -32,6 +33,7 @@ class Producto(db.Model):
     precio = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
     imagen_url = db.Column(db.String(250))
+
 class Pedido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
@@ -55,7 +57,6 @@ with app.app_context():
 @app.route('/')
 def index():
     return jsonify({"mensaje": "API FERREMAS en funcionamiento"})
-
 
 def token_requerido(roles_permitidos=None):
     def decorator(f):
@@ -105,7 +106,6 @@ def registrar_usuario():
     db.session.commit()
     return jsonify({"mensaje": "Usuario creado correctamente"}), 201
 
-
 @app.route('/login', methods=['POST'])
 def login():
     datos = request.get_json()
@@ -128,7 +128,6 @@ def login():
     else:
         return jsonify({"mensaje": "Contraseña incorrecta"}), 401
 
-
 @app.route('/usuario/me', methods=['GET'])
 @token_requerido()
 def obtener_perfil(usuario):
@@ -137,7 +136,6 @@ def obtener_perfil(usuario):
         "correo": usuario.correo,
         "rol": usuario.rol
     })
-
 
 @app.route('/usuario/me', methods=['PUT'])
 @token_requerido()
@@ -171,7 +169,6 @@ def obtener_productos():
         })
     return jsonify(lista_productos)
 
-# Nuevo endpoint para crear pedido desde carrito
 @app.route('/pedido', methods=['POST'])
 @token_requerido()
 def crear_pedido(usuario):
@@ -183,7 +180,6 @@ def crear_pedido(usuario):
     total = 0
     detalles = []
 
-    # Validar stock y calcular total
     for item in carrito:
         producto = Producto.query.get(item.get('id'))
         if not producto:
@@ -202,16 +198,14 @@ def crear_pedido(usuario):
             'subtotal': subtotal
         })
 
-    # Crear pedido
     nuevo_pedido = Pedido(
         usuario_id=usuario.id,
         total=total,
         estado='pendiente'
     )
     db.session.add(nuevo_pedido)
-    db.session.flush()  # Para obtener id del pedido
+    db.session.flush()
 
-    # Crear detalles pedido y descontar stock
     for detalle in detalles:
         producto = detalle['producto']
         cantidad = detalle['cantidad']
@@ -224,14 +218,30 @@ def crear_pedido(usuario):
             subtotal=subtotal
         )
         db.session.add(detalle_pedido)
-
-        # Actualizar stock
         producto.stock -= cantidad
 
     db.session.commit()
 
     return jsonify({'mensaje': 'Pedido creado correctamente', 'pedido_id': nuevo_pedido.id}), 201
+@app.route('/dolar', methods=['GET'])
+def obtener_dolar():
+    try:
+        response = requests.get('https://mindicador.cl/api/dolar')
+        if response.status_code != 200:
+            return jsonify({"mensaje": "No se pudo obtener el valor del dólar"}), 500
+
+        data = response.json()
+        valor_dolar = data['serie'][0]['valor']
+        return jsonify({"dolar": valor_dolar}), 200
+
+    except Exception as e:
+        return jsonify({"mensaje": "Error al obtener el dólar", "error": str(e)}), 500
+
+
+from transbank_routes import transbank_bp
+app.register_blueprint(transbank_bp)
+
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
