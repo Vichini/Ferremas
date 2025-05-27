@@ -35,17 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return div;
       };
 
-      // Mostrar productos completos si hay contenedor
       if (contenedorListado) {
-        contenedorListado.innerHTML = ''; // limpiar antes
+        contenedorListado.innerHTML = ''; 
         data.forEach(prod => {
           contenedorListado.appendChild(renderProducto(prod));
         });
       }
 
-      // Mostrar solo primeros 3 como destacados, sin slider
+    
       if (contenedorDestacados) {
-        contenedorDestacados.innerHTML = ''; // limpiar antes
+        contenedorDestacados.innerHTML = '';
         const destacados = data.slice(0, 3);
         destacados.forEach(prod => {
           contenedorDestacados.appendChild(renderProducto(prod));

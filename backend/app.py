@@ -9,7 +9,11 @@ import jwt
 import requests
 
 app = Flask(__name__)
-CORS(app, origins=["http://127.0.0.1:5500", "http://localhost:5500"], supports_credentials=True)
+CORS(app, origins=[
+    "http://localhost:5500",
+    "http://127.0.0.1:5500"
+], supports_credentials=True)
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ferremas.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

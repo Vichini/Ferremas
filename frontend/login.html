@@ -9,11 +9,12 @@
     main {
       max-width: 400px;
       margin: 2rem auto;
-      background: #f9f9f9;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      background: #fff8f0; /* fondo claro beige/naranja muy suave */
+      padding: 2rem 2.5rem;
+      border-radius: 14px;
+      box-shadow: 0 8px 25px rgb(255 111 0 / 0.15);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #3b3b3b;
     }
     form {
       display: none;
@@ -23,50 +24,68 @@
       display: flex;
     }
     label {
-      margin-top: 1rem;
-      font-weight: 600;
+      margin-top: 1.2rem;
+      font-weight: 700;
+      color: #ff6f00; /* naranja fuerte */
+      font-size: 1.05rem;
     }
     input {
-      padding: 0.5rem;
+      padding: 0.55rem 0.8rem;
       font-size: 1rem;
       margin-top: 0.3rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: 2px solid #ff6f00; /* borde naranja */
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+      outline-offset: 2px;
+    }
+    input:focus {
+      border-color: #e65a00; /* naranja oscuro */
+      box-shadow: 0 0 6px rgb(230 90 0 / 0.6);
     }
     button {
-      margin-top: 1.5rem;
-      padding: 0.8rem;
-      background-color: #2c3e50;
+      margin-top: 2rem;
+      padding: 0.9rem;
+      background-color: #ff6f00;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 50px;
       cursor: pointer;
       font-weight: 700;
-      transition: background-color 0.3s ease;
+      font-size: 1.1rem;
+      box-shadow: 0 6px 15px rgb(255 111 0 / 0.5);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
     button:hover {
-      background-color: #1a242f;
+      background-color: #e65a00;
+      box-shadow: 0 8px 20px rgb(230 90 0 / 0.8);
     }
     .toggle-link {
-      margin-top: 1rem;
-      color: #2c3e50;
+      margin-top: 1.4rem;
+      color: #ff6f00;
       cursor: pointer;
       text-decoration: underline;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       user-select: none;
       text-align: center;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    .toggle-link:hover {
+      color: #e65a00;
     }
     .error-msg {
       color: #e74c3c;
       font-size: 0.9rem;
       margin-top: 0.5rem;
       text-align: center;
+      font-weight: 600;
     }
     .success-msg {
       color: #27ae60;
       font-size: 0.9rem;
       margin-top: 0.5rem;
       text-align: center;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -82,7 +101,6 @@
   </header>
 
   <main>
-    
     <form id="form-login" class="active">
       <label for="login-correo">Correo:</label>
       <input type="email" id="login-correo" name="correo" required />
@@ -95,7 +113,6 @@
       <div class="error-msg" id="login-error"></div>
     </form>
 
-    <!-- Formulario de Registro -->
     <form id="form-register">
       <label for="register-usuario">Usuario:</label>
       <input type="text" id="register-usuario" name="usuario" required />
@@ -192,7 +209,6 @@
       formRegister.reset();
     });
 
-    // Login con backend y redirección por rol
     formLogin.addEventListener('submit', async e => {
       e.preventDefault();
       clearMessages();
@@ -216,7 +232,6 @@
           alert(`Bienvenido, ${correo}!`);
           formLogin.reset();
 
-          // Redireccionar según rol
           if (data.rol === 'admin') {
             window.location.href = 'admin.html';
           } else {

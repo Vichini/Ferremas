@@ -2,10 +2,10 @@ from app import app, db, Usuario, Producto
 from werkzeug.security import generate_password_hash
 
 with app.app_context():
-    # Crear tablas si no existen
+    
     db.create_all()
 
-    # Crear usuarios iniciales
+ 
     usuarios_iniciales = [
         Usuario(
             nombre='Admin Ferremas',
@@ -27,12 +27,12 @@ with app.app_context():
         ),
     ]
 
-    # Insertar usuarios si no existen
+   
     for u in usuarios_iniciales:
         if not Usuario.query.filter_by(correo=u.correo).first():
             db.session.add(u)
 
-    # Crear productos iniciales
+   
     productos_iniciales = [
         Producto(
             nombre='Martillo',
@@ -54,7 +54,7 @@ with app.app_context():
         ),
     ]
 
-    # Insertar productos si no existen
+  
     for p in productos_iniciales:
         if not Producto.query.filter_by(nombre=p.nombre).first():
             db.session.add(p)

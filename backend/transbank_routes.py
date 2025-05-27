@@ -14,7 +14,7 @@ def iniciar_pago():
         return jsonify({"mensaje": "Monto y pedido_id son requeridos"}), 400
 
     try:
-        # Crear instancia de Transaction pasando los parámetros directamente
+       
         transaction = Transaction(
             commerce_code="597055555532",
             api_key="597055555532",
@@ -41,7 +41,7 @@ def confirmar_pago():
         return jsonify({"mensaje": "Token no proporcionado"}), 400
 
     try:
-        # Aquí también se debe crear instancia Transaction con los mismos parámetros
+        
         transaction = Transaction(
             commerce_code="597055555532",
             api_key="597055555532",

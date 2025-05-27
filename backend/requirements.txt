@@ -1,0 +1,6 @@
+Flask==2.3.2
+Flask-SQLAlchemy==3.0.3
+Flask-Migrate==4.0.4
+Werkzeug==2.3.4
+transbank-sdk
+python-dotenv==1.0.1

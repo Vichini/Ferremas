@@ -5,7 +5,7 @@ document.getElementById('form-login').addEventListener('submit', async function(
   const password = document.getElementById('login-password').value;
   const mensaje = document.getElementById('login-error');
 
-  mensaje.textContent = ''; // limpiar mensaje
+  mensaje.textContent = ''; 
 
   try {
     const res = await fetch('http://localhost:5000/login', {
@@ -19,11 +19,11 @@ document.getElementById('form-login').addEventListener('submit', async function(
     const data = await res.json();
 
     if (res.ok) {
-      // Guardar token y usuario en localStorage
+   
       localStorage.setItem('token', data.token);
       localStorage.setItem('usuario', JSON.stringify({ correo, rol: data.rol || 'usuario' }));
 
-      window.location.href = 'index.html'; // o la página que quieras
+      window.location.href = 'index.html'; 
     } else {
       mensaje.textContent = data.mensaje || 'Credenciales inválidas';
     }

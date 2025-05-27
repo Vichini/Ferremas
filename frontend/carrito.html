@@ -5,6 +5,130 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FERREMAS | Carrito de Compras</title>
   <link rel="stylesheet" href="css/estilos.css" />
+  
+  <style>
+  /* --- Estilos específicos para carrito --- */
+
+  main {
+    max-width: 800px;
+    margin: 0 auto 60px auto;
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.1);
+  }
+
+  main h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #212529;
+    font-weight: 700;
+    font-size: 2.4rem;
+  }
+
+  .lista-carrito {
+    list-style: none;
+    margin-bottom: 30px;
+    padding-left: 0;
+  }
+
+  .lista-carrito li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f1f1f1;
+    padding: 14px 20px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #333;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.07);
+    transition: background-color 0.3s ease;
+  }
+
+  .lista-carrito li:hover {
+    background-color: #ffe6cc;
+  }
+
+  .lista-carrito li span.cantidad {
+    background: #ff6f00;
+    color: white;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-left: 10px;
+    font-size: 0.9rem;
+  }
+
+  p#total {
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: right;
+    margin-bottom: 30px;
+    color: #212529;
+  }
+
+  .botones-carrito {
+    display: flex;
+    justify-content: flex-end;
+    gap: 18px;
+  }
+
+  .botones-carrito button {
+    background-color: #ff6f00;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 0 6px 15px rgb(255 111 0 / 0.4);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .botones-carrito button:hover {
+    background-color: #e65a00;
+    box-shadow: 0 8px 20px rgb(230 90 0 / 0.6);
+  }
+
+  /* Para boton "Vaciar carrito" hacerlo un poco más tenue */
+  #vaciar-carrito {
+    background-color: #666;
+    box-shadow: 0 6px 15px rgb(102 102 102 / 0.4);
+  }
+
+  #vaciar-carrito:hover {
+    background-color: #444;
+    box-shadow: 0 8px 20px rgb(68 68 68 / 0.6);
+  }
+
+  /* Responsive para carrito */
+  @media (max-width: 480px) {
+    main {
+      padding: 20px 15px;
+    }
+
+    .lista-carrito li {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .lista-carrito li span.cantidad {
+      margin-left: 0;
+      margin-top: 8px;
+    }
+
+    .botones-carrito {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .botones-carrito button {
+      width: 100%;
+    }
+  }
+  </style>
 </head>
 <body>
   <header>

@@ -10,22 +10,93 @@
   <header>
     <h1>FERREMAS - Tu Ferretería De Confianza</h1>
     <nav>
-      <a href="index.html">Inicio</a>
+      <a href="index.html" class="active">Inicio</a>
       <a href="productos.html">Productos</a>
       <a href="carrito.html">Carrito</a>
       <a href="login.html">Iniciar sesión</a>
     </nav>
   </header>
-<main>
-  <h2>Productos destacados</h2>
-  <div id="destacados" class="productos-grid"></div>
 
-</main>
+  <main>
+    <!-- Hero banner -->
+    <section class="hero">
+      <div class="hero-content">
+        <h2>Todo lo que necesitas para tus proyectos</h2>
+        <p>Calidad, precio y servicio en un solo lugar.</p>
+        <a href="productos.html" class="btn-cta">Ver productos</a>
+      </div>
+      
+    </section>
 
+    <!-- Productos destacados -->
+    <section>
+      <h2>Productos destacados</h2>
+      <div id="destacados" class="productos-grid"></div>
+    </section>
+
+    <!-- Beneficios -->
+    <section class="beneficios">
+      <h2>¿Por qué elegir FERREMAS?</h2>
+      <div class="beneficios-list">
+        <div class="beneficio-item">
+          <h3>Calidad Garantizada</h3>
+          <p>Solo trabajamos con marcas reconocidas para asegurar la mejor calidad.</p>
+        </div>
+        <div class="beneficio-item">
+          <h3>Envío rápido</h3>
+          <p>Recibe tus productos en el menor tiempo posible con nuestro servicio express.</p>
+        </div>
+        <div class="beneficio-item">
+          <h3>Atención personalizada</h3>
+          <p>Asesoría experta para ayudarte a elegir lo que necesitas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categorías destacadas -->
+    <section class="categorias">
+      <h2>Categorías principales</h2>
+      <div class="categorias-list">
+        <div class="categoria-item">
+          <img src="https://via.placeholder.com/300x200/555555/ffffff?text=Herramientas" alt="Herramientas" />
+          <h4>Herramientas</h4>
+        </div>
+        <div class="categoria-item">
+          <img src="https://via.placeholder.com/300x200/888888/ffffff?text=Materiales" alt="Materiales" />
+          <h4>Materiales</h4>
+        </div>
+        <div class="categoria-item">
+          <img src="https://via.placeholder.com/300x200/333333/ffffff?text=Equipos+de+seguridad" alt="Seguridad" />
+          <h4>Equipos de seguridad</h4>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
   <footer>
-    <p>© 2025 FERREMAS. Todos los derechos reservados.</p>
+    <div class="footer-content">
+      <p>© 2025 FERREMAS. Todos los derechos reservados.</p>
+      <div class="redes-sociales" style="display:flex; gap: 15px; justify-content:center; margin-top:10px;">
+        <a href="#" aria-label="Facebook" style="color:#3b5998; display:flex; align-items:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#3b5998" viewBox="0 0 24 24">
+            <path d="M22.675 0h-21.35C.6 0 0 .6 0 1.326v21.348C0 23.4.6 24 1.326 24h11.494v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.464.099 2.795.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.31h3.588l-.467 3.622h-3.121V24h6.116C23.4 24 24 23.4 24 22.674V1.326C24 .6 23.4 0 22.675 0z"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Instagram" style="color:#E4405F; display:flex; align-items:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#E4405F" viewBox="0 0 24 24">
+            <path d="M7.75 2h8.5C18.55 2 21 4.45 21 7.75v8.5c0 3.3-2.45 5.75-5.75 5.75h-8.5C5.45 22 3 19.55 3 16.25v-8.5C3 4.45 5.45 2 7.75 2zm0 2C6.783 4 6 4.783 6 5.75v8.5c0 .967.783 1.75 1.75 1.75h8.5c.967 0 1.75-.783 1.75-1.75v-8.5c0-.967-.783-1.75-1.75-1.75h-8.5zm4.25 1.5a4.25 4.25 0 110 8.5 4.25 4.25 0 010-8.5zm0 2a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5zm3.5-.25a1 1 0 110 2 1 1 0 010-2z"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Twitter" style="color:#1DA1F2; display:flex; align-items:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1DA1F2" viewBox="0 0 24 24">
+            <path d="M23.954 4.569a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.724c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.691 8.094 4.066 6.13 1.64 3.161a4.822 4.822 0 00-.666 2.475c0 1.708.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.92 4.92 0 003.946 4.827 4.996 4.996 0 01-2.224.084 4.927 4.927 0 004.6 3.42 9.868 9.868 0 01-6.102 2.105c-.395 0-.787-.023-1.175-.068a13.934 13.934 0 007.557 2.212c9.054 0 14.002-7.496 14.002-13.986 0-.21 0-.423-.015-.633a9.936 9.936 0 002.457-2.548l-.047-.02z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
   </footer>
+
   <script src="js/productos.js"></script>
   <script src="js/carrito.js"></script>
 </body>
