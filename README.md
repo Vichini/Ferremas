@@ -1,4 +1,4 @@
-# 🎉 Ferremas - Sistema de Ferretería
+#  Ferremas - Sistema de Ferretería
 
 ---
 
